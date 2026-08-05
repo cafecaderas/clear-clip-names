@@ -1,20 +1,31 @@
 # Clear Clip Names
 
 An Ableton Live Extension (built with the `@ableton-extensions/sdk` public
-beta). Right-click a time selection on one or more tracks in the Arrangement
-view and choose **Clear Clip Names** to blank out the name of every clip
-inside that selection, on those tracks. It's a quick way to reset a messy
-project back to Live's default (auto/file-based) clip labels.
+beta) for cleaning up messy Arrangement views. Right-click a time
+selection on one or more tracks to either wipe clip names back to
+Live's defaults, or rename every clip in the selection to a name you
+type — no more manually clicking through dozens of clips one at a time.
 
-## What it does
+Current version: **0.3.0**. See [CHANGELOG.md](./CHANGELOG.md) for what
+changed in each version.
 
-- Triggers from: right-click on a MIDI or Audio track **while you have a
-  time range selected** in the Arrangement view (this is how the SDK exposes
-  "which tracks + which range" together).
-- For every clip inside that range, on the selected track(s), sets
-  `clip.name = ""`.
-- Wraps the whole thing in a single transaction, so it's one undo (Cmd/Ctrl+Z)
-  step no matter how many clips it touches.
+## Commands
+
+### Clear Clip Names
+
+Right-click a time selection on a MIDI or Audio track in Arrangement
+view → **Clear Clip Names**. Blanks out the name of every clip inside
+that range, on the selected track(s) — resets them to Live's default
+(auto/file-based) labels. One undo step for the whole batch.
+
+### Rename Clips
+
+Right-click a time selection → **Rename Clips...**. A dialog asks for a
+name; every clip in the selection (across however many tracks you had
+selected) gets renamed to exactly that text — e.g. type
+`Intro 128bpm Emin` and every matching clip reads exactly that. One undo
+step for the whole batch. Cancel (Escape or the Cancel button) does
+nothing.
 
 ## Requirements
 
@@ -25,42 +36,32 @@ project back to Live's default (auto/file-based) clip labels.
 
 ## Setup
 
+See [GETTING_STARTED.md](./GETTING_STARTED.md) for the full first-run
+walkthrough (vendoring the SDK tarballs, installing dependencies,
+building, and installing into Live).
+
+Quick version, once `vendor/` has the SDK tarballs in place:
+
 ```bash
 npm install
-npm run build      # compiles src/extension.ts -> dist/extension.js
+npm run build      # type-check + bundle to dist/extension.js
+npm run package     # produces a .ablx you can drag onto Live's
+                     # Settings → Extensions page
 ```
 
-Then in Live: **Settings → Extensions → Install Extension**, and point it at
-this folder (or however your build of the SDK packages it — beta tooling has
-been adding a `npm run package` step that produces a `.ablx` archive; if your
-SDK install has that script, use it instead).
+## Project structure
 
-## One thing to double check first
+- `src/extension.ts` — both commands: context menu registration, track/
+  clip resolution, the transactions that do the actual renaming.
+- `src/interface.html` — the modal dialog UI for Rename Clips.
+- `build.ts` — esbuild bundling script (includes an HTML-as-text loader
+  for the dialog).
+- `manifest.json` — extension metadata Live reads (name, version, entry
+  point).
+- `vendor/` — local SDK/CLI tarballs (not committed — see
+  `.gitignore`; anyone cloning this repo needs to get their own copies
+  from Ableton's beta program).
 
-This SDK is a fresh public beta, and the exact method name for "give me the
-clips that overlap this time range on a track" has shown small differences
-across early builds. In `src/extension.ts` that call is:
+## License
 
-```ts
-const clips = track.getClipsInRange(start, end);
-```
-
-Before your first build, open `node_modules/@ableton-extensions/sdk` and
-search the type definitions for `Clip` on `Track` / `MidiTrack` / `AudioTrack`
-to confirm that's the real name in your installed version — TypeScript will
-also just tell you loudly if it's wrong. Everything else in this file
-(`registerContextMenuAction`, `registerCommand`, `getObjectFromHandle`,
-`withinTransaction`) is confirmed against the SDK's own examples.
-
-## Next step (not built yet, on purpose)
-
-You mentioned wanting an actual **rename** option later — e.g. renaming
-clips to a pattern like `Track Name - 01`, `Track Name - 02`. When you're
-ready for that:
-
-- Swap `clip.name = ""` for a naming function, and pass an index as you loop.
-- Consider adding a small input dialog (`context.ui.withinModalDialog` or
-  similar) so the user can type a prefix/pattern before it runs, rather than
-  hardcoding one.
-
-Good next milestone once "clear" is working end-to-end in Live.
+Not yet specified — add one before treating this as reusable by others.
