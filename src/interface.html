@@ -23,15 +23,15 @@
       doSendMessage({ method: "close_and_send", params: [JSON.stringify(result)] });
     }
 
-    function confirmPrefix() {
-      closeWithResult({ prefix: document.getElementById('prefix').value });
+    function confirmName() {
+      closeWithResult({ name: document.getElementById('name').value });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('prefix').focus();
+      document.getElementById('name').focus();
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') confirmPrefix();
-        if (e.key === 'Escape') closeWithResult({ prefix: null });
+        if (e.key === 'Enter') confirmName();
+        if (e.key === 'Escape') closeWithResult({ name: null });
       });
     });
   </script>
@@ -143,11 +143,11 @@
 
 <body>
   <div class="form">
-    <label class="alx-label" for="prefix">Name prefix</label>
-    <input class="alx-input" type="text" id="prefix" placeholder="e.g. Drums" />
+    <label class="alx-label" for="name">Clip name</label>
+    <input class="alx-input" type="text" id="name" placeholder="e.g. Intro 128bpm Emin" />
     <div class="buttons">
-      <button class="alx-button" onclick='closeWithResult({ prefix: null })'>Cancel</button>
-      <button class="alx-button" onclick="confirmPrefix()">OK</button>
+      <button class="alx-button" onclick='closeWithResult({ name: null })'>Cancel</button>
+      <button class="alx-button" onclick="confirmName()">OK</button>
     </div>
   </div>
 </body>

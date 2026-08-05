@@ -108,16 +108,16 @@ export function activate(activation: ActivationContext) {
 
     // Pass the HTML content as a data URL to avoid needing to host it
     // anywhere. The resolved value is the JSON string the dialog passes to
-    // closeWithResult(); we expect a "prefix" property that's null on
+    // closeWithResult(); we expect a "name" property that's null on
     // cancel.
     const result = await api.ui.showModalDialog(
       `data:text/html,${encodeURIComponent(renameClipsInterface)}`,
       360,
       240,
     );
-    const prefix = (JSON.parse(result) as { prefix: string | null }).prefix;
+    const name = (JSON.parse(result) as { name: string | null }).name;
 
-    if (prefix === null) {
+    if (name === null) {
       console.log("Rename Clips: cancelled.");
       return;
     }
@@ -129,17 +129,14 @@ export function activate(activation: ActivationContext) {
     // One undo step for the whole operation.
     api.withinTransaction(() => {
       for (const track of tracks) {
-        const clips = track.arrangementClips
-          .filter((clip) => clip.startTime < end && clip.endTime > start)
-          .sort((a, b) => a.startTime - b.startTime);
+        const clips = track.arrangementClips.filter(
+          (clip) => clip.startTime < end && clip.endTime > start,
+        );
 
-        const padWidth = Math.max(2, String(clips.length).length);
-
-        clips.forEach((clip, index) => {
-          const n = String(index + 1).padStart(padWidth, "0");
-          clip.name = `${prefix} ${n}`;
+        for (const clip of clips) {
+          clip.name = name;
           renamedCount++;
-        });
+        }
       }
     });
 
